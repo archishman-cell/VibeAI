@@ -13,7 +13,6 @@ function App() {
   const [error, setError] = useState("")
   const [isTyping, setIsTyping] = useState(false)
   const [copied, setCopied] = useState(false)
-  const [showAlert, setShowAlert] = useState(true)
   
   // Use typing animation for the answer
   const displayedAnswer = useTypingAnimation(answer, 20)
@@ -62,78 +61,13 @@ function App() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Modern Development Alert */}
-      {/*{showAlert && (
-        <div className="relative bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border-b border-blue-200 shadow-lg alert-enter">
-          <div className="max-w-7xl mx-auto px-4 py-5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className="flex-shrink-0">
-                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
-                    <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                  </div>
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-base font-bold gradient-text-animated mb-1">
-                    🚀 Development Mode
-                  </h3>
-                  <p className="text-sm text-gray-700 leading-relaxed">
-                    This app is in development stage. Only the <span className="font-semibold text-blue-600 bg-blue-100 px-1.5 py-0.5 rounded">chat feature</span> is currently available.
-                  </p>
-                </div>
-              </div>
-              
-              <div className="flex items-center space-x-4">
-                <div className="hidden sm:flex items-center space-x-2 text-xs text-gray-600 bg-white/60 px-3 py-1.5 rounded-full">
-                  <div className="w-2 h-2 bg-green-400 rounded-full animate-ping"></div>
-                  <span className="font-medium">Live Development</span>
-                </div>
-                
-                <button
-                  onClick={() => setShowAlert(false)}
-                  className="alert-dismiss p-2.5 text-gray-400 hover:text-gray-600 rounded-full transition-all duration-200 group"
-                  aria-label="Dismiss alert"
-                >
-                  <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-            
-             Progress Bar 
-            <div className="mt-4">
-              <div className="flex items-center justify-between text-xs text-gray-600 mb-2">
-                <span className="font-medium">Development Progress</span>
-                <span className="font-bold text-blue-600">25%</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2 shadow-inner">
-                <div className="progress-bar bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full shadow-sm" style={{width: '25%'}}></div>
-              </div>
-              <div className="mt-2 text-xs text-gray-500">
-                <span className="inline-flex items-center">
-                  <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  Next: Enhanced UI components & Advanced features
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}*/}
-
       {/* Sidebar */}
-      <div className="fixed left-0 top-0 h-full w-64 bg-gray-50 border-r border-gray-200  flex-col hidden lg:flex" style={{top: showAlert ? '120px' : '0px'}}>
+      <div className="fixed left-0 top-0 h-full w-64 bg-gray-50 border-r border-gray-200  flex-col hidden lg:flex">
         {/* Logo */}
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-blue-500 rounded-lg flex items-center justify-center">
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-              </svg>
+            
             </div>
             <span className="text-lg font-semibold text-gray-800">VibeAI</span>
             <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -178,10 +112,16 @@ function App() {
       </div>
 
       {/* Main Content */}
-      <div className="lg:ml-64 flex flex-col h-screen" style={{marginTop: showAlert ? '120px' : '0px'}}>
+      <div className="lg:ml-64 flex flex-col h-screen">
         {/* Top Bar */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white">
-          <div className="flex-1"></div>
+          {/* Mobile brand (logo + text) */}
+          <div className="flex items-center lg:hidden">
+            <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-blue-500 rounded-lg flex items-center justify-center"></div>
+            <span className="ml-2 text-base font-semibold text-gray-800">VibeAI</span>
+          </div>
+          
+          <div className="hidden lg:block flex-1"></div>
           <button className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors flex items-center space-x-2">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
@@ -196,7 +136,7 @@ function App() {
         </div>
 
         {/* Chat Area */}
-        <div className="flex-1 flex flex-col p-4 sm:p-8 pb-24 lg:pb-8">
+        <div className="flex-1 flex flex-col p-4 sm:p-8 pb-24 lg:pb-28">
           {/* Main Content Area */}
           <div className="flex-1 flex flex-col items-center justify-center">
             {!answer && !isLoading && !error && (
@@ -358,10 +298,10 @@ function App() {
             </div>
           </div>
 
-          {/* Desktop Input Area - Only show when no answer or in follow-up mode */}
+          {/* Sticky Input Area - Desktop */}
           <div className="hidden lg:block">
-            {(!answer && !isLoading && !error) && (
-              <div className="w-full max-w-3xl mx-auto">
+            <div className="fixed bottom-0 left-64 right-0 bg-white border-t border-gray-200 p-4 z-20">
+              <div className="w-full max-w-4xl mx-auto">
                 <div className="flex items-center bg-white border-2 border-gray-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow">
                   <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -410,61 +350,9 @@ function App() {
                   </div>
                 </div>
               </div>
-            )}
-
-            {/* Follow-up Input for Desktop */}
-            {answer && !error && (
-              <div className="w-full max-w-3xl mx-auto mt-8">
-                <div className="flex items-center bg-white border-2 border-gray-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow">
-                  <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
-                  </button>
-                  
-                  <textarea
-                    value={question}
-                    onChange={(e) => setQuestion(e.target.value)}
-                    placeholder="Ask a follow-up question"
-                    className="flex-1 px-4 py-2 border-none outline-none resize-none text-gray-800 placeholder-gray-400"
-                    rows={1}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        generate();
-                      }
-                    }}
-                  />
-                  
-                  <div className="flex items-center space-x-2">
-                    <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                      </svg>
-                    </button>
-                    <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2m0 0V1a1 1 0 011-1h2a1 1 0 011 1v18a1 1 0 01-1 1H4a1 1 0 01-1-1V4a1 1 0 011-1h2a1 1 0 011 1v3m0 0h8" />
-                      </svg>
-                    </button>
-                    <button 
-                      onClick={generate}
-                      disabled={isLoading || !question.trim()}
-                      className={`p-2 rounded-lg transition-all ${
-                        isLoading || !question.trim()
-                          ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                          : 'bg-green-500 text-white hover:bg-green-600'
-                      }`}
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
+            </div>
           </div>
+
         </div>
       </div>
     </div>
