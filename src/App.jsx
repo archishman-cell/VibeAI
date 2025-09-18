@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import logo from '/assets/logo.png'
 import './App.css'
 import apiService from './services/apiService'
 import { useTypingAnimation } from './hooks/useTypingAnimation'
@@ -15,7 +14,7 @@ function App() {
   const [copied, setCopied] = useState(false)
   
   // Use typing animation for the answer
-  const displayedAnswer = useTypingAnimation(answer, 20)
+  const displayedAnswer = useTypingAnimation(answer, 2)
 
   // Handle typing completion
   useEffect(() => {
@@ -43,6 +42,10 @@ function App() {
     setError("")
     setIsLoading(true)
     
+    // Clear previous answer and input area
+    setAnswer("")
+    setQuestion("")
+    
     try {
       // Use the API service to generate content
       const response = await apiService.generateContent(question)
@@ -66,9 +69,8 @@ function App() {
         {/* Logo */}
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-blue-500 rounded-lg flex items-center justify-center">
+            <img src="./assets/logo.png" alt="Logo"  className="h-5 w-5 text-white" />
             
-            </div>
             <span className="text-lg font-semibold text-gray-800">VibeAI</span>
             <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -114,18 +116,15 @@ function App() {
       {/* Main Content */}
       <div className="lg:ml-64 flex flex-col h-screen">
         {/* Top Bar */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white">
+        <div className="sticky top-0 z-30 flex items-center justify-between p-4 border-b border-gray-200 bg-white">
           {/* Mobile brand (logo + text) */}
           <div className="flex items-center lg:hidden">
-            <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-blue-500 rounded-lg flex items-center justify-center"></div>
+            <img src="./assets/logo.png" alt="Logo" className="h-9 w-9" />
             <span className="ml-2 text-base font-semibold text-gray-800">VibeAI</span>
           </div>
           
           <div className="hidden lg:block flex-1"></div>
-          <button className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors flex items-center space-x-2">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
-            </svg>
+          <button className="px-4 py-2 bg-white text-black rounded-lg text-sm font-medium hover:text-white transition-normal hover:bg-black  flex items-center space-x-2">
             <span>Upgrade to Pro</span>
           </button>
           <button className="ml-4 p-2 text-gray-500 hover:text-gray-700 transition-colors">
@@ -172,15 +171,11 @@ function App() {
               </div>
             )}
 
-            {/* Loading Animation */}
+            {/* Loading Animation 
             {isLoading && (
               <div className="w-full max-w-3xl">
                 <div className="flex items-start space-x-4 p-6">
-                  <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                    </svg>
-                  </div>
+                  <img src="./assets/logo.png" alt="Logo" className="w-9 h-9 bg-transparent rounded-lg flex items-center justify-center flex-shrink-0 p-1" />
                   <div className="flex-1">
                     <div className="bg-gray-100 rounded-lg p-4">
                       <div className="flex items-center space-x-2">
@@ -195,19 +190,35 @@ function App() {
                   </div>
                 </div>
               </div>
+            )}*/}
+            {/* Loading Animation*/} 
+            {isLoading && (
+              <div className="max-w-3xl">
+                <div className="flex items-start space-x-4 p-6">
+                  <div className="flex-1">
+                    <div className="bg-gray-100 rounded-lg p-4 border-1 border-gray-800">
+                      <div className="flex items-center space-x-2">
+                        <div className="flex space-x-1">
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                        </div>
+                        <span className="text-sm text-gray-500">AI is thinking...</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             )}
+
 
             {/* Answer Display with Typing Animation */}
             {answer && !error && (
-              <div className="w-full max-w-3xl">
-                <div className="flex items-start space-x-4 p-6">
-                  <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                    </svg>
-                  </div>
+              <div className="max-w-3xl">
+                <div className="flex items-start space-x-1 ">
+                  <img src="./assets/logo.png" alt="Logo" className="w-9 h-9 bg-transparent rounded-lg flex items-center justify-center flex-shrink-0 p-1" />
                   <div className="flex-1">
-                    <div className="bg-gray-50 rounded-lg p-4">
+                    <div className="bg-gray-50 rounded-lg p-3">
                       <div className="prose prose-sm max-w-none">
                         <div className="text-gray-800 whitespace-pre-wrap break-words leading-relaxed">
                           {displayedAnswer}
@@ -287,7 +298,7 @@ function App() {
                   className={`p-2 rounded-lg transition-all ${
                     isLoading || !question.trim()
                       ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                      : 'bg-green-500 text-white hover:bg-green-600'
+                      : 'bg-gray-800 text-white hover:bg-gray-800'
                   }`}
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -340,7 +351,7 @@ function App() {
                       className={`p-2 rounded-lg transition-all ${
                         isLoading || !question.trim()
                           ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                          : 'bg-green-500 text-white hover:bg-green-600'
+                          : 'bg-gray-800 text-white hover:bg-grey-800'
                       }`}
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
  * @param {number} speed - Typing speed in milliseconds
  * @returns {string} - The animated text
  */
-export const useTypingAnimation = (text, speed = 30) => {
+export const useTypingAnimation = (text, speed = 2) => {
   const [displayedText, setDisplayedText] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
 
