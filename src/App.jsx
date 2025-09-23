@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import logo from '/assets/logo.png'
 import './App.css'
 import apiService from './services/apiService'
@@ -15,6 +15,10 @@ function App() {
   const [copied, setCopied] = useState(false)
   const [promptCopied, setPromptCopied] = useState(false)
   
+  // Ref for auto-scrolling
+  const scrollContainerRef = useRef(null)
+  const messagesEndRef = useRef(null)
+  
   // Use typing animation for the answer and improved prompt
   const displayedAnswer = useTypingAnimation(answer, 2)
   const displayedImprovedPrompt = useTypingAnimation(improvedPrompt, 3)
@@ -25,6 +29,24 @@ function App() {
       setIsTyping(false)
     }
   }, [displayedAnswer.length, answer.length])
+
+  // Auto-scroll functionality
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
+    }
+  }, [displayedAnswer, displayedImprovedPrompt])
+
+  // Scroll to bottom when new content is generated
+  useEffect(() => {
+    if (answer || improvedPrompt) {
+      setTimeout(() => {
+        if (messagesEndRef.current) {
+          messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
+        }
+      }, 100)
+    }
+  }, [answer, improvedPrompt])
 
   // Handle copy functionality for answer
   const handleCopy = async () => {
@@ -151,7 +173,7 @@ function App() {
         </div>
 
         {/* Chat Area */}
-        <div className="flex-1 flex flex-col p-4 sm:p-8 pb-24 lg:pb-28">
+        <div ref={scrollContainerRef} className="flex-1 flex flex-col p-4 sm:p-8 pb-24 lg:pb-28 overflow-y-auto">
           {/* Main Content Area */}
           <div className="flex-1 flex flex-col items-center justify-center">
             {!answer && !isLoading && !error && (
@@ -334,6 +356,9 @@ function App() {
                 )}
               </div>
             )}
+            
+            {/* Invisible element to scroll to */}
+            <div ref={messagesEndRef} />
           </div>
 
           {/* Sticky Input Area - Mobile */}
