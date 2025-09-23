@@ -159,6 +159,85 @@ class ApiService {
   }
 
   /**
+   * Generates both answer and improved prompt suggestion using Gemini AI
+   * @param {string} question - The question to ask
+   * @returns {Promise<Object>} - Object containing both answer and improved prompt
+   */
+  async generateContentWithPromptSuggestion(question) {
+    try {
+      // Validate inputs
+      this.validateQuestion(question);
+      this.validateApiKey();
+
+      console.log("Making API request for answer and prompt suggestion...");
+      
+      // Create a comprehensive prompt that asks for both answer and improved prompt
+      const enhancedPrompt = `Please provide two things:
+
+1. ANSWER: Answer the following question: "${question}"
+
+2. IMPROVED_PROMPT: Suggest a better, more specific version of the user's question that would yield a more detailed, accurate, or useful response. Consider what additional context, constraints, or specifics would help get a better answer.
+
+Format your response exactly like this:
+ANSWER:
+[Your answer here]
+
+IMPROVED_PROMPT:
+[Your improved prompt suggestion here]`;
+
+      // Make the API request
+      const response = await axios({
+        method: 'post',
+        url: API_URL,
+        data: {
+          "contents": [
+            {
+              "parts": [
+                {
+                  "text": enhancedPrompt
+                }
+              ]
+            }
+          ]
+        },
+        timeout: this.timeout,
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      // Validate and extract response
+      const responseText = this.validateResponse(response);
+      
+      // Parse the response to extract answer and improved prompt
+      const { answer, improvedPrompt } = this.parseResponseWithPrompt(responseText);
+      
+      console.log("Response with prompt suggestion received successfully");
+      return { answer, improvedPrompt };
+      
+    } catch (error) {
+      // Handle and re-throw with user-friendly message
+      const userFriendlyError = this.handleError(error);
+      throw new Error(userFriendlyError);
+    }
+  }
+
+  /**
+   * Parses the API response to extract answer and improved prompt
+   * @param {string} responseText - The raw response text
+   * @returns {Object} - Object containing answer and improvedPrompt
+   */
+  parseResponseWithPrompt(responseText) {
+    const answerMatch = responseText.match(/ANSWER:\s*([\s\S]*?)(?=IMPROVED_PROMPT:|$)/i);
+    const promptMatch = responseText.match(/IMPROVED_PROMPT:\s*([\s\S]*?)$/i);
+
+    const answer = answerMatch ? answerMatch[1].trim() : responseText;
+    const improvedPrompt = promptMatch ? promptMatch[1].trim() : "Here's a more specific version of your question: " + responseText.substring(0, 100) + "...";
+
+    return { answer, improvedPrompt };
+  }
+
+  /**
    * Gets the current API configuration
    * @returns {Object} - API configuration object
    */
