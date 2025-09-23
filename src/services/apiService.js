@@ -10,7 +10,7 @@ const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-
  */
 class ApiService {
   constructor() {
-    this.timeout = 30000; // 30 seconds timeout
+    this.timeout = 60000; // 60 seconds timeout
   }
 
   /**
