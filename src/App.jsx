@@ -16,6 +16,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [isTyping, setIsTyping] = useState(false)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   
   // Ref for auto-scrolling
   const scrollContainerRef = useRef(null)
@@ -105,10 +106,20 @@ function App() {
     }
   }
 
+  /**
+   * Resets the chat state to start a new conversation.
+   */
+  const startNewChat = () => {
+    setQuestion("");
+    setAnswer("");
+    setImprovedPrompt("");
+    setError("");
+    setIsSidebarOpen(false); // Close sidebar on mobile after action
+  };
+
   return (
-    <div className="min-h-screen bg-white">
-      {/* Sidebar */}
-      <div className="fixed left-0 top-0 h-full w-64 bg-gray-50 border-r border-gray-200  flex-col hidden lg:flex">
+    <div className="min-h-screen bg-white font-sans">
+      <div className={`fixed left-0 top-0 h-full w-64 bg-gray-50 border-r border-gray-200 flex-col z-40 lg:flex transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
         {/* Logo */}
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center space-x-2">
@@ -127,12 +138,7 @@ function App() {
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
-            <span onClick={() => {
-                    setQuestion("")
-                    setAnswer("")
-                    setImprovedPrompt("")
-                    setError("")
-                  }}>New Chat</span>
+            <span onClick={startNewChat}>New Chat</span>
           </button>
           
           <button className="w-full flex items-center space-x-3 p-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
@@ -161,15 +167,24 @@ function App() {
         </div>
       </div>
 
+      {/* Overlay for mobile sidebar */}
+      {isSidebarOpen && (
+        <div 
+          className="lg:hidden fixed inset-0 bg-black/40 z-30"
+          onClick={() => setIsSidebarOpen(false)}
+        ></div>
+      )}
+
       {/* Main Content */}
-      <div className="lg:ml-64 flex flex-col h-screen">
+      <div className="lg:ml-64 flex flex-col h-screen transition-all duration-300 ease-in-out">
         {/* Top Bar */}
-        <div className="sticky top-0 z-30 flex items-center justify-between p-4 border-b border-gray-200 bg-white">
-          {/* Mobile brand (logo + text) */}
-          <div className="flex items-center lg:hidden">
-            <img src="./assets/logo.png" alt="Logo" className="h-9 w-9" />
-            <span className="ml-2 text-base font-semibold text-gray-800">VibeAI</span>
-          </div>
+        <div className="sticky top-0 z-20 flex items-center justify-between p-3 lg:p-4 border-b border-gray-200 bg-white/80 backdrop-blur-sm">
+          {/* Hamburger Menu for Mobile */}
+          <button onClick={() => setIsSidebarOpen(true)} className="p-2 text-gray-600 hover:text-gray-800 lg:hidden">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
           
           <div className="hidden lg:block flex-1"></div>
           <button className="px-4 py-2 bg-white text-black rounded-lg text-sm font-medium hover:text-white transition-normal hover:bg-black  flex items-center space-x-2">
@@ -183,7 +198,7 @@ function App() {
         </div>
 
         {/* Chat Area */}
-        <div ref={scrollContainerRef} className="flex-1 flex flex-col p-4 sm:p-8 pb-24 lg:pb-28 overflow-y-auto">
+        <div ref={scrollContainerRef} className="flex-1 flex flex-col p-4 sm:p-6 md:p-8 pb-32 lg:pb-40 overflow-y-auto">
           {/* Main Content Area */}
           <div className="flex-1 flex flex-col items-center justify-center">
             {!answer && !isLoading && !error && (
@@ -207,12 +222,7 @@ function App() {
                   </div>
                 </div>
                 <button 
-                  onClick={() => {
-                    setQuestion("")
-                    setAnswer("")
-                    setImprovedPrompt("")
-                    setError("")
-                  }}
+                  onClick={startNewChat}
                   className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
                 >
                   Start New Chat
