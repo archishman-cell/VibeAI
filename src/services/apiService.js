@@ -161,9 +161,12 @@ class ApiService {
   /**
    * Generates both answer and improved prompt suggestion using Gemini AI
    * @param {string} question - The question to ask
+   * @param {object} options - Additional options for the request, like an AbortSignal.
+   * @param {AbortSignal} options.signal - The signal to abort the request.
    * @returns {Promise<Object>} - Object containing both answer and improved prompt
    */
-  async generateContentWithPromptSuggestion(question) {
+  async generateContentWithPromptSuggestion(question, options = {}) {
+    const { signal } = options;
     try {
       // Validate inputs
       this.validateQuestion(question);
@@ -175,12 +178,19 @@ class ApiService {
       const enhancedPrompt = `Please provide two things:
 
 1. ANSWER: Answer the following question: "${question}"
+   - Use proper markdown formatting for better readability
+   - Include headings (##, ###) for sections when appropriate
+   - Use bullet points or numbered lists for multiple items
+   - Use **bold** for important terms and *italics* for emphasis
+   - Include code blocks with \`\`\`language for any code examples
+   - Use > for important quotes or notes
+   - Format tables using markdown table syntax when presenting data
 
 2. IMPROVED_PROMPT: Suggest a better, more specific version of the user's question that would yield a more detailed, accurate, or useful response. Consider what additional context, constraints, or specifics would help get a better answer.
 
 Format your response exactly like this:
 ANSWER:
-[Your answer here]
+[Your well-formatted markdown answer here]
 
 IMPROVED_PROMPT:
 [Your improved prompt suggestion here]`;
@@ -201,6 +211,7 @@ IMPROVED_PROMPT:
           ]
         },
         timeout: this.timeout,
+        signal, // Pass the signal to axios for cancellation
         headers: {
           'Content-Type': 'application/json',
         }
@@ -216,6 +227,11 @@ IMPROVED_PROMPT:
       return { answer, improvedPrompt };
       
     } catch (error) {
+      // Handle cancellation specifically
+      if (axios.isCancel(error)) {
+        console.log("API request was canceled by the user.");
+        throw new Error("Generation stopped by user.");
+      }
       // Handle and re-throw with user-friendly message
       const userFriendlyError = this.handleError(error);
       throw new Error(userFriendlyError);

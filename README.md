@@ -8,13 +8,22 @@ VibeAI is a modern, responsive AI chat application built with React and Vite. It
 
 ## ✨ Features
 
-*   **🤖 AI Chat:** Ask questions and get intelligent answers from our advanced AI.
-*   **💡 Prompt Improvement:** VibeAI suggests improved prompts to help you get even better responses from the AI.
-*   **✒️ Typing Animation:** Watch the AI's response and prompt suggestions unfold with a smooth typing animation.
-*   **📋 Copy to Clipboard:** Easily copy the AI's answer or the improved prompt to your clipboard with a single click.
-*   ** gracefully handles errors and provides clear feedback to the user.
-*   **⏳ Loading Animations:** A sleek loading animation lets you know when the AI is deep in thought.
-*   **📱 Responsive Design:** Enjoy a seamless experience on both desktop and mobile devices.
+### 🎨 Enhanced Text Display
+*   **📝 Markdown Rendering:** Rich text formatting with proper headings, lists, code blocks, and styling
+*   **🎨 Syntax Highlighting:** Beautiful code syntax highlighting for multiple programming languages
+*   **📊 Table Support:** Properly formatted tables with GitHub Flavored Markdown
+*   **💬 Blockquotes & Emphasis:** Enhanced typography with quotes, bold, and italic text support
+
+### 🤖 AI Interaction
+*   **🤖 AI Chat:** Ask questions and get intelligent, well-formatted answers from Google Gemini API
+*   **💡 Prompt Improvement:** VibeAI suggests improved prompts to help you get even better responses
+*   **✒️ Typing Animation:** Watch the AI's response and prompt suggestions unfold with smooth typing animation
+*   **📋 Enhanced Copy:** Copy formatted text with individual section copying capabilities
+
+### 🛡️ Reliability & Performance
+*   **🔄 Robust Error Handling:** Comprehensive error handling with 60-second timeouts and user-friendly messages
+*   **⏳ Enhanced Loading:** Beautiful loading animations with content placeholders
+*   **📱 Mobile-First Design:** 90% mobile compatibility with responsive design and auto-scroll functionality
 *   **💬 Chat History:** (Coming Soon) Save and revisit your previous conversations.
 *   **🔎 Search:** (Coming Soon) Quickly search through your chat history.
 *   **🖼️ Gallery:** (Coming Soon) A gallery to showcase AI-generated images or other media.
@@ -61,6 +70,18 @@ Open [http://localhost:5173](http://localhost:5173) to view it in the browser.
 
 ## 🛠️ Built With
 
+### Core Technologies
 *   [React](https://reactjs.org/) - A JavaScript library for building user interfaces
-*   [Vite](https://vitejs.dev/) - A next-generation front-end tooling
-*   [Tailwind CSS](https://tailwindcss.com/) - A utility-first CSS framework
+*   [Vite](https://vitejs.dev/) - Next-generation front-end tooling for fast development
+*   [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework for responsive design
+
+### Enhanced Text Rendering
+*   [React Markdown](https://github.com/remarkjs/react-markdown) - Markdown component for React
+*   [React Syntax Highlighter](https://github.com/react-syntax-highlighter/react-syntax-highlighter) - Syntax highlighting for code blocks
+*   [Remark GFM](https://github.com/remarkjs/remark-gfm) - GitHub Flavored Markdown support
+*   [Rehype Raw](https://github.com/rehypejs/rehype-raw) - Raw HTML support in markdown
+
+### API Integration
+*   [Google Gemini API](https://ai.google.dev/) - Advanced AI language model
+*   [Axios](https://axios-http.com/) - HTTP client for API requests
+*   Custom service layer architecture for robust error handling

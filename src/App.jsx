@@ -3,6 +3,10 @@ import logo from '/assets/logo.png'
 import './App.css'
 import apiService from './services/apiService'
 import { useTypingAnimation } from './hooks/useTypingAnimation'
+import MarkdownRenderer from './components/MarkdownRenderer'
+import CopyButton from './components/CopyButton'
+import LoadingAnimation from './components/LoadingAnimation'
+import ResponseSection from './components/ResponseSection'
 
 function App() {
   
@@ -12,16 +16,15 @@ function App() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [isTyping, setIsTyping] = useState(false)
-  const [copied, setCopied] = useState(false)
-  const [promptCopied, setPromptCopied] = useState(false)
   
   // Ref for auto-scrolling
   const scrollContainerRef = useRef(null)
   const messagesEndRef = useRef(null)
+  const abortControllerRef = useRef(null)
   
   // Use typing animation for the answer and improved prompt
-  const displayedAnswer = useTypingAnimation(answer, 2)
-  const displayedImprovedPrompt = useTypingAnimation(improvedPrompt, 3)
+  const displayedAnswer = useTypingAnimation(answer, 2, !isTyping)
+  const displayedImprovedPrompt = useTypingAnimation(improvedPrompt, 3, !isTyping)
 
   // Handle typing completion
   useEffect(() => {
@@ -38,6 +41,7 @@ function App() {
   }, [displayedAnswer, displayedImprovedPrompt])
 
   // Scroll to bottom when new content is generated
+{/*
   useEffect(() => {
     if (answer || improvedPrompt) {
       setTimeout(() => {
@@ -47,28 +51,7 @@ function App() {
       }, 100)
     }
   }, [answer, improvedPrompt])
-
-  // Handle copy functionality for answer
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(answer)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000) // Reset after 2 seconds
-    } catch (err) {
-      console.error('Failed to copy text: ', err)
-    }
-  }
-
-  // Handle copy functionality for improved prompt
-  const handlePromptCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(improvedPrompt)
-      setPromptCopied(true)
-      setTimeout(() => setPromptCopied(false), 2000) // Reset after 2 seconds
-    } catch (err) {
-      console.error('Failed to copy prompt: ', err)
-    }
-  }
+*/}
 
   /**
    * Generates AI response using the API service with prompt suggestion
@@ -84,15 +67,24 @@ function App() {
     setQuestion("")
     
     try {
+      // Create a new AbortController for this request
+      abortControllerRef.current = new AbortController();
+      const signal = abortControllerRef.current.signal;
+
       // Use the API service to generate content with prompt suggestion
-      const { answer: response, improvedPrompt: promptSuggestion } = await apiService.generateContentWithPromptSuggestion(question)
+      const { answer: response, improvedPrompt: promptSuggestion } = await apiService.generateContentWithPromptSuggestion(question, { signal })
       setIsTyping(true)
       setAnswer(response)
       setImprovedPrompt(promptSuggestion)
       
     } catch (error) {
-      // Set error message from the API service
-      setError(error.message)
+      // Don't show an error if the user stopped the generation
+      if (error.message === "Generation stopped by user.") {
+        console.log("Generation successfully stopped.");
+      } else {
+        // Set error message from the API service
+        setError(error.message);
+      }
     } finally {
       // Always reset loading state
       setIsLoading(false)
@@ -100,6 +92,18 @@ function App() {
               }
 
 
+  /**
+   * Stops the AI response generation
+   */
+  function stopGeneration() {
+    if (isLoading) {
+      abortControllerRef.current?.abort();
+    } else if (isTyping) {
+      // If we are just typing, stop the animation by setting the final text
+      // and marking typing as complete.
+      setIsTyping(false);
+    }
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -215,151 +219,33 @@ function App() {
                 </button>
               </div>
             )}
-            
-          
-            {/* Loading Animation 
-            {isLoading && (
-              <div className="w-full max-w-3xl">
-                <div className="flex items-start space-x-4 p-6">
-                  <img src="./assets/logo.png" alt="Logo" className="w-9 h-9 bg-transparent rounded-lg flex items-center justify-center flex-shrink-0 p-1" />
-                  <div className="flex-1">
-                    <div className="bg-gray-100 rounded-lg p-4">
-                      <div className="flex items-center space-x-2">
-                        <div className="flex space-x-1">
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-                        </div>
-                        <span className="text-sm text-gray-500">AI is thinking...</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}*/}
-            {/* Loading Animation*/} 
-            {isLoading && (
-              <div className="max-w-3xl">
-                <div className="flex items-start space-x-4 p-6">
-                  <div className="flex-1">
-                    <div className="bg-gray-100 rounded-lg p-4 border-1 border-gray-800">
-                      <div className="flex items-center space-x-2">
-                        <div className="flex space-x-1">
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-                        </div>
-                        <span className="text-sm text-gray-500">AI is thinking...</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
 
             {/* Answer Display with Typing Animation */}
             {answer && !error && (
               <div className="max-w-3xl w-full space-y-4">
                 {/* Main Answer */}
-                <div className="flex items-start space-x-1">
-                  <img src="./assets/logo.png" alt="Logo" className="w-9 h-9 bg-transparent rounded-lg flex items-center justify-center flex-shrink-0 p-1" />
-                  <div className="flex-1">
-                    <div className="bg-gray-50 rounded-lg p-3">
-                      <div className="prose prose-sm max-w-none">
-                        <div className="text-gray-800 whitespace-pre-wrap break-words leading-relaxed">
-                          {displayedAnswer}
-                          {isTyping && displayedAnswer.length < answer.length && (
-                            <span className="inline-block w-2 h-5 bg-gray-400 ml-1 animate-pulse"></span>
-                          )}
-                        </div>
-                      </div>
-                      {displayedAnswer.length === answer.length && (
-                        <div className="mt-4 flex items-center justify-between">
-                          <button 
-                            onClick={handleCopy}
-                            className={`text-sm transition-colors flex items-center space-x-1 ${
-                              copied 
-                                ? 'text-green-600 font-medium' 
-                                : 'text-gray-500 hover:text-gray-700'
-                            }`}
-                          >
-                            {copied ? (
-                              <>
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                </svg>
-                                <span>Copied!</span>
-                              </>
-                            ) : (
-                              <>
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                </svg>
-                                <span>Copy Answer</span>
-                              </>
-                            )}
-                          </button>
-                          <span className="text-xs text-gray-400">Just now</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                <ResponseSection
+                  content={answer}
+                  displayedContent={displayedAnswer}
+                  isTyping={isTyping}
+                  icon={<img src="./assets/logo.png" alt="Logo" className="w-5 h-5" />}
+                  variant="default"
+                />
 
                 {/* Improved Prompt Suggestion */}
                 {improvedPrompt && displayedAnswer.length === answer.length && (
-                  <div className="flex items-start space-x-1">
-                    <div className="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <ResponseSection
+                    content={improvedPrompt}
+                    displayedContent={displayedImprovedPrompt}
+                    isTyping={displayedImprovedPrompt.length < improvedPrompt.length}
+                    title="💡 Improved Prompt Suggestion"
+                    icon={
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                       </svg>
-                    </div>
-                    <div className="flex-1">
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                        <div className="flex items-center space-x-2 mb-2">
-                          <h3 className="text-sm font-semibold text-blue-800">💡 Improved Prompt Suggestion</h3>
-                        </div>
-                        <div className="prose prose-sm max-w-none">
-                          <div className="text-blue-700 whitespace-pre-wrap break-words leading-relaxed">
-                            {displayedImprovedPrompt}
-                            {displayedImprovedPrompt.length < improvedPrompt.length && (
-                              <span className="inline-block w-2 h-5 bg-blue-400 ml-1 animate-pulse"></span>
-                            )}
-                          </div>
-                        </div>
-                        {displayedImprovedPrompt.length === improvedPrompt.length && (
-                          <div className="mt-3 flex items-center justify-between">
-                            <button 
-                              onClick={handlePromptCopy}
-                              className={`text-sm transition-colors flex items-center space-x-1 ${
-                                promptCopied 
-                                  ? 'text-green-600 font-medium' 
-                                  : 'text-blue-600 hover:text-blue-800'
-                              }`}
-                            >
-                              {promptCopied ? (
-                                <>
-                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                  </svg>
-                                  <span>Copied!</span>
-                                </>
-                              ) : (
-                                <>
-                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                  </svg>
-                                  <span>Copy Prompt</span>
-                                </>
-                              )}
-                            </button>
-                            <span className="text-xs text-blue-500">Use this for better results</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
+                    }
+                    variant="suggestion"
+                  />
                 )}
               </div>
             )}
@@ -369,8 +255,22 @@ function App() {
           </div>
 
           {/* Sticky Input Area - Mobile */}
-          <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-10" style={{bottom: '0'}}>
-            <div className="flex items-center bg-white border-2 border-gray-200 rounded-2xl p-3 shadow-lg">
+          <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-sm border-t border-gray-200 p-2 z-10">
+            <div className="flex flex-col items-center w-full">
+              {/* Stop Generating Button - Mobile */}
+              {(isLoading || isTyping) && (
+                <div className="mb-2">
+                  <button
+                    onClick={stopGeneration}
+                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium flex items-center space-x-2"
+                  >
+                    {isLoading && <div className="w-4 h-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></div>}
+                    <span>{isLoading ? 'Stop Generating' : 'Stop Typing'}</span>
+                  </button>
+                </div>
+              )}
+            </div>
+            <div className="flex items-center bg-white border-2 border-gray-200 rounded-2xl p-2 shadow-lg">
               <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -406,6 +306,7 @@ function App() {
                       : 'bg-gray-800 text-white hover:bg-gray-800'
                   }`}
                 >
+                  
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                   </svg>
@@ -416,8 +317,23 @@ function App() {
 
           {/* Sticky Input Area - Desktop */}
           <div className="hidden lg:block">
-            <div className="fixed bottom-0 left-64 right-0 bg-white border-t border-gray-200 p-4 z-20">
-              <div className="w-full max-w-4xl mx-auto">
+            <div className="fixed bottom-0 left-64 right-0 bg-white/80 backdrop-blur-sm p-4 z-20">
+              <div className="w-full max-w-4xl mx-auto flex flex-col items-center">
+                {/* Stop Generating Button - Desktop */}
+                {(isLoading || isTyping) && (
+                  <div className="mb-3">
+                    <button
+                      onClick={stopGeneration}
+                      className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium flex items-center space-x-2"
+                    >
+                      {isLoading && <div className="w-4 h-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></div>}
+                      <span>{isLoading ? 'Stop Generating' : 'Stop Typing'}</span>
+                    </button>
+                  </div>
+                )}
+                {isLoading && !answer && <LoadingAnimation />}
+
+                {/* Input Field */}
                 <div className="flex items-center bg-white border-2 border-gray-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow">
                   <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
