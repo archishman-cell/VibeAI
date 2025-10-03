@@ -88,6 +88,8 @@ const MarkdownRenderer = ({ content, className = "" }) => {
                     style={oneDark}
                     language={language}
                     PreTag="div"
+                    wrapLines={true}
+                    wrapLongLines={true}
                     customStyle={{
                       margin: 0,
                       borderRadius: 0,

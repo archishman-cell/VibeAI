@@ -17,15 +17,30 @@ function App() {
   const [error, setError] = useState("")
   const [isTyping, setIsTyping] = useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [isAppMenuOpen, setIsAppMenuOpen] = useState(false)
   
   // Ref for auto-scrolling
   const scrollContainerRef = useRef(null)
+  const appMenuRef = useRef(null)
   const messagesEndRef = useRef(null)
   const abortControllerRef = useRef(null)
   
   // Use typing animation for the answer and improved prompt
   const displayedAnswer = useTypingAnimation(answer, 2, !isTyping)
   const displayedImprovedPrompt = useTypingAnimation(improvedPrompt, 3, !isTyping)
+
+  // Effect to handle clicks outside the app menu
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (appMenuRef.current && !appMenuRef.current.contains(event.target)) {
+        setIsAppMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [appMenuRef]);
 
   // Handle typing completion
   useEffect(() => {
@@ -190,11 +205,29 @@ function App() {
           <button className="px-4 py-2 bg-white text-black rounded-lg text-sm font-medium hover:text-white transition-normal hover:bg-black  flex items-center space-x-2">
             <span>Upgrade to Pro</span>
           </button>
-          <button className="ml-4 p-2 text-gray-500 hover:text-gray-700 transition-colors">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-            </svg>
-          </button>
+          <div ref={appMenuRef} className="relative ml-4">
+            <button onClick={() => setIsAppMenuOpen(!isAppMenuOpen)} className="p-2 text-gray-500 hover:text-gray-700 transition-colors">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+              </svg>
+            </button>
+            {isAppMenuOpen && (
+              <div className="absolute top-full right-0 mt-3 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
+                <button
+                  onClick={() => console.log('About clicked')}
+                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  About
+                </button>
+                <button
+                  onClick={() => console.log('Export Chat clicked')}
+                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  Export Chat
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Chat Area */}
