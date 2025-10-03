@@ -7,6 +7,7 @@ import MarkdownRenderer from './components/MarkdownRenderer'
 import CopyButton from './components/CopyButton'
 import LoadingAnimation from './components/LoadingAnimation'
 import ResponseSection from './components/ResponseSection'
+import AboutModal from './components/AboutModal'
 
 function App() {
   
@@ -18,6 +19,7 @@ function App() {
   const [isTyping, setIsTyping] = useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isAppMenuOpen, setIsAppMenuOpen] = useState(false)
+  const [isAboutModalOpen, setIsAboutModalOpen] = useState(false)
   
   // Ref for auto-scrolling
   const scrollContainerRef = useRef(null)
@@ -214,7 +216,10 @@ function App() {
             {isAppMenuOpen && (
               <div className="absolute top-full right-0 mt-3 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
                 <button
-                  onClick={() => console.log('About clicked')}
+                  onClick={() => {
+                    setIsAboutModalOpen(true);
+                    setIsAppMenuOpen(false);
+                  }}
                   className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 >
                   About
@@ -430,6 +435,8 @@ function App() {
 
         </div>
       </div>
+
+      <AboutModal isOpen={isAboutModalOpen} onClose={() => setIsAboutModalOpen(false)} />
     </div>
   )
 }
