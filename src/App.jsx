@@ -20,6 +20,9 @@ function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isAppMenuOpen, setIsAppMenuOpen] = useState(false)
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false)
+  const [chatHistory, setChatHistory] = useState([])
+  const [userScrolledUp, setUserScrolledUp] = useState(false)
+  const [currentQuestion, setCurrentQuestion] = useState("")
   
   // Ref for auto-scrolling
   const scrollContainerRef = useRef(null)
@@ -30,6 +33,14 @@ function App() {
   // Use typing animation for the answer and improved prompt
   const displayedAnswer = useTypingAnimation(answer, 2, !isTyping)
   const displayedImprovedPrompt = useTypingAnimation(improvedPrompt, 3, !isTyping)
+
+  // Load chat history from local storage on component mount
+  useEffect(() => {
+    const savedChatHistory = localStorage.getItem('chatHistory');
+    if (savedChatHistory) {
+      setChatHistory(JSON.parse(savedChatHistory));
+    }
+  }, []);
 
   // Effect to handle clicks outside the app menu
   useEffect(() => {
@@ -51,12 +62,34 @@ function App() {
     }
   }, [displayedAnswer.length, answer.length])
 
-  // Auto-scroll functionality
+  // Detect user scroll behavior
   useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
+    const handleScroll = () => {
+      if (scrollContainerRef.current) {
+        const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
+        const isAtBottom = scrollTop + clientHeight >= scrollHeight - 10; // 10px threshold
+        setUserScrolledUp(!isAtBottom);
+      }
+    };
+
+    const scrollContainer = scrollContainerRef.current;
+    if (scrollContainer) {
+      scrollContainer.addEventListener('scroll', handleScroll);
+      return () => scrollContainer.removeEventListener('scroll', handleScroll);
     }
-  }, [displayedAnswer, displayedImprovedPrompt])
+  }, []);
+
+  // Auto-scroll functionality - only scroll if user hasn't scrolled up
+  useEffect(() => {
+    if (answer && !userScrolledUp) {
+      // Only scroll if user is at the bottom
+      setTimeout(() => {
+        if (messagesEndRef.current) {
+          messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
+        }
+      }, 100)
+    }
+  }, [answer, userScrolledUp])
 
   // Scroll to bottom when new content is generated
 {/*
@@ -78,6 +111,11 @@ function App() {
     // Reset previous error and set loading state
     setError("")
     setIsLoading(true)
+    setUserScrolledUp(false) // Reset scroll state for new question
+    
+    // Store the current question before clearing it
+    const questionToProcess = question;
+    setCurrentQuestion(questionToProcess);
     
     // Clear previous answer and input area
     setAnswer("")
@@ -90,10 +128,21 @@ function App() {
       const signal = abortControllerRef.current.signal;
 
       // Use the API service to generate content with prompt suggestion
-      const { answer: response, improvedPrompt: promptSuggestion } = await apiService.generateContentWithPromptSuggestion(question, { signal })
+      const { answer: response, improvedPrompt: promptSuggestion } = await apiService.generateContentWithPromptSuggestion(questionToProcess, { signal })
       setIsTyping(true)
       setAnswer(response)
       setImprovedPrompt(promptSuggestion)
+
+      // Create a new chat item and add it to the history
+      const newChatItem = { question: questionToProcess, answer: response, improvedPrompt: promptSuggestion };
+      const updatedChatHistory = [...chatHistory, newChatItem];
+      setChatHistory(updatedChatHistory);
+
+      // Save updated chat history to local storage
+      localStorage.setItem('chatHistory', JSON.stringify(updatedChatHistory));
+      
+      // Clear current question after successful response
+      setCurrentQuestion("");
       
     } catch (error) {
       // Don't show an error if the user stopped the generation
@@ -116,10 +165,6 @@ function App() {
   function stopGeneration() {
     if (isLoading) {
       abortControllerRef.current?.abort();
-    } else if (isTyping) {
-      // If we are just typing, stop the animation by setting the final text
-      // and marking typing as complete.
-      setIsTyping(false);
     }
   }
 
@@ -131,6 +176,21 @@ function App() {
     setAnswer("");
     setImprovedPrompt("");
     setError("");
+    setCurrentQuestion("");
+    setIsSidebarOpen(false); // Close sidebar on mobile after action
+  };
+
+  /**
+   * Clears all chat history and resets the conversation.
+   */
+  const clearChatHistory = () => {
+    setChatHistory([]);
+    setQuestion("");
+    setAnswer("");
+    setImprovedPrompt("");
+    setError("");
+    setCurrentQuestion("");
+    localStorage.removeItem('chatHistory');
     setIsSidebarOpen(false); // Close sidebar on mobile after action
   };
 
@@ -151,12 +211,21 @@ function App() {
 
         {/* Navigation */}
         <div className="flex-1 p-4 space-y-2">
-          <button className="w-full flex items-center space-x-3 p-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+          <button onClick={startNewChat} className="w-full flex items-center space-x-3 p-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
-            <span onClick={startNewChat}>New Chat</span>
+            <span>New Chat</span>
           </button>
+          
+          {chatHistory.length > 0 && (
+            <button onClick={clearChatHistory} className="w-full flex items-center space-x-3 p-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              <span>Clear History</span>
+            </button>
+          )}
           
           <button className="w-full flex items-center space-x-3 p-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -237,9 +306,60 @@ function App() {
 
         {/* Chat Area */}
         <div ref={scrollContainerRef} className="flex-1 flex flex-col p-4 sm:p-6 md:p-8 pb-32 lg:pb-40 overflow-y-auto">
+          {/* Chat History */}
+          {chatHistory.length > 0 && (
+            <div className="w-full max-w-4xl mx-auto space-y-6">
+              {chatHistory.map((chatItem, index) => (
+                <div key={index} className="space-y-4">
+                  {/* User Question */}
+                  <div className="flex items-start space-x-4">
+                    <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <div className="bg-gray-50 rounded-lg p-4">
+                        <p className="text-gray-800 whitespace-pre-wrap">{chatItem.question}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* AI Response */}
+                  <div className="flex items-start space-x-4">
+                    <img src="./assets/logo.png" alt="Logo" className="w-8 h-8 rounded-full flex-shrink-0" />
+                    <div className="flex-1">
+                      <div className="bg-white border border-gray-200 rounded-lg p-4">
+                        <div className="prose prose-sm max-w-none">
+                          <MarkdownRenderer 
+                            content={chatItem.answer}
+                            className="text-gray-800"
+                          />
+                        </div>
+                        {chatItem.improvedPrompt && (
+                          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                            <div className="flex items-center space-x-2 mb-2">
+                              <h3 className="text-sm font-semibold text-blue-800">💡 Improved Prompt Suggestion</h3>
+                            </div>
+                            <div className="text-blue-700 text-sm">
+                              <MarkdownRenderer 
+                                content={chatItem.improvedPrompt}
+                                className="text-blue-700"
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* Main Content Area */}
           <div className="flex-1 flex flex-col items-center justify-center">
-            {!answer && !isLoading && !error && (
+            {chatHistory.length === 0 && !answer && !isLoading && !error && (
               <div className="text-center max-w-2xl">
                 <h1 className="text-2xl sm:text-4xl font-semibold text-gray-800 mb-6 sm:mb-8">What can I help with?</h1>
               </div>
@@ -268,32 +388,73 @@ function App() {
               </div>
             )}
 
-            {/* Answer Display with Typing Animation */}
-            {answer && !error && (
-              <div className="max-w-3xl w-full space-y-4">
-                {/* Main Answer */}
-                <ResponseSection
-                  content={answer}
-                  displayedContent={displayedAnswer}
-                  isTyping={isTyping}
-                  icon={<img src="./assets/logo.png" alt="Logo" className="w-5 h-5" />}
-                  variant="default"
-                />
+            {/* Current Message Display */}
+            {currentQuestion && (
+              <div className="w-full max-w-4xl mx-auto space-y-4">
+                {/* Current User Question */}
+                <div className="flex items-start space-x-4">
+                  <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <p className="text-gray-800 whitespace-pre-wrap">{currentQuestion}</p>
+                    </div>
+                  </div>
+                </div>
 
-                {/* Improved Prompt Suggestion */}
-                {improvedPrompt && displayedAnswer.length === answer.length && (
-                  <ResponseSection
-                    content={improvedPrompt}
-                    displayedContent={displayedImprovedPrompt}
-                    isTyping={displayedImprovedPrompt.length < improvedPrompt.length}
-                    title="💡 Improved Prompt Suggestion"
-                    icon={
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                      </svg>
-                    }
-                    variant="suggestion"
-                  />
+                {/* Loading Animation */}
+                {isLoading && (
+                  <div className="flex items-start space-x-4">
+                    <img src="./assets/logo.png" alt="Logo" className="w-8 h-8 rounded-full flex-shrink-0" />
+                    <div className="flex-1">
+                      <div className="bg-white border border-gray-200 rounded-lg p-4">
+                        <LoadingAnimation />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Current AI Response */}
+                {answer && !error && (
+                  <div className="flex items-start space-x-4">
+                    <img src="./assets/logo.png" alt="Logo" className="w-8 h-8 rounded-full flex-shrink-0" />
+                    <div className="flex-1">
+                      <div className="bg-white border border-gray-200 rounded-lg p-4">
+                        <div className="prose prose-sm max-w-none">
+                          <div className="text-gray-800">
+                            <MarkdownRenderer 
+                              content={displayedAnswer}
+                              className="text-gray-800"
+                            />
+                            {isTyping && displayedAnswer.length < answer.length && (
+                              <span className="inline-block w-2 h-5 bg-gray-400 ml-1 animate-pulse"></span>
+                            )}
+                          </div>
+                        </div>
+                        {improvedPrompt && displayedAnswer.length === answer.length && (
+                          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                            <div className="flex items-center space-x-2 mb-2">
+                              <h3 className="text-sm font-semibold text-blue-800">💡 Improved Prompt Suggestion</h3>
+                            </div>
+                            <div className="text-blue-700 text-sm">
+                              <div>
+                                <MarkdownRenderer 
+                                  content={displayedImprovedPrompt}
+                                  className="text-blue-700"
+                                />
+                                {displayedImprovedPrompt.length < improvedPrompt.length && (
+                                  <span className="inline-block w-2 h-5 bg-blue-400 ml-1 animate-pulse"></span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 )}
               </div>
             )}
@@ -305,18 +466,6 @@ function App() {
           {/* Sticky Input Area - Mobile */}
           <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-sm border-t border-gray-200 p-2 z-10">
             <div className="flex flex-col items-center w-full">
-              {/* Stop Generating Button - Mobile */}
-              {(isLoading || isTyping) && (
-                <div className="mb-2">
-                  <button
-                    onClick={stopGeneration}
-                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium flex items-center space-x-2"
-                  >
-                    {isLoading && <div className="w-4 h-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></div>}
-                    <span>{isLoading ? 'Stop Generating' : 'Stop Typing'}</span>
-                  </button>
-                </div>
-              )}
             </div>
             <div className="flex items-center bg-white border-2 border-gray-200 rounded-2xl p-2 shadow-lg">
               <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
@@ -367,19 +516,7 @@ function App() {
           <div className="hidden lg:block">
             <div className="fixed bottom-0 left-64 right-0 bg-white/80 backdrop-blur-sm p-4 z-20">
               <div className="w-full max-w-4xl mx-auto flex flex-col items-center">
-                {/* Stop Generating Button - Desktop */}
-                {(isLoading || isTyping) && (
-                  <div className="mb-3">
-                    <button
-                      onClick={stopGeneration}
-                      className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium flex items-center space-x-2"
-                    >
-                      {isLoading && <div className="w-4 h-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></div>}
-                      <span>{isLoading ? 'Stop Generating' : 'Stop Typing'}</span>
-                    </button>
-                  </div>
-                )}
-                {isLoading && !answer && <LoadingAnimation />}
+
 
                 {/* Input Field */}
                 <div className="flex items-center bg-white border-2 border-gray-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow">

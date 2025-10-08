@@ -17,14 +17,16 @@ VibeAI is a modern, responsive AI chat application built with React and Vite. It
 ### 🤖 AI Interaction
 *   **🤖 AI Chat:** Ask questions and get intelligent, well-formatted answers from Google Gemini API
 *   **💡 Prompt Improvement:** VibeAI suggests improved prompts to help you get even better responses
-*   **✒️ Typing Animation:** Watch the AI's response and prompt suggestions unfold with smooth typing animation
+*   **✒️ Typing Animation:** Watch the AI\'s response and prompt suggestions unfold with smooth typing animation
 *   **📋 Enhanced Copy:** Copy formatted text with individual section copying capabilities
+*   **💬 Chat History:** Save and revisit your previous conversations, stored locally in your browser.
+*   **🗑️ Clear History:** Easily clear your entire chat history and start fresh.
 
 ### 🛡️ Reliability & Performance
 *   **🔄 Robust Error Handling:** Comprehensive error handling with 60-second timeouts and user-friendly messages
 *   **⏳ Enhanced Loading:** Beautiful loading animations with content placeholders
 *   **📱 Mobile-First Design:** 90% mobile compatibility with responsive design and auto-scroll functionality
-*   **💬 Chat History:** (Coming Soon) Save and revisit your previous conversations.
+*   **📁 Collapsible Sidebar:** A collapsible sidebar to easily navigate and manage your chats.
 *   **🔎 Search:** (Coming Soon) Quickly search through your chat history.
 *   **🖼️ Gallery:** (Coming Soon) A gallery to showcase AI-generated images or other media.
 *   **👤 User Profiles:** (Coming Soon) Personalize your VibeAI experience with user profiles.

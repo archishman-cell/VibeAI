@@ -71,7 +71,7 @@ const MarkdownRenderer = ({ content, className = "" }) => {
             
             if (!inline && language) {
               return (
-                <div className="mb-4 rounded-lg overflow-hidden border border-gray-200">
+                <div className="mb-4 rounded-lg overflow-hidden border border-gray-200 max-w-full">
                   <div className="bg-gray-800 text-gray-300 px-4 py-2 text-xs font-medium flex items-center justify-between">
                     <span>{language.toUpperCase()}</span>
                     <button
@@ -84,22 +84,26 @@ const MarkdownRenderer = ({ content, className = "" }) => {
                       </svg>
                     </button>
                   </div>
-                  <SyntaxHighlighter
-                    style={oneDark}
-                    language={language}
-                    PreTag="div"
-                    wrapLines={true}
-                    wrapLongLines={true}
-                    customStyle={{
-                      margin: 0,
-                      borderRadius: 0,
-                      fontSize: '13px',
-                      lineHeight: '1.5'
-                    }}
-                    {...props}
+                  <div className="overflow-x-auto">
+                    <SyntaxHighlighter
+                      style={oneDark}
+                      language={language}
+                      PreTag="div"
+                      wrapLines={true}
+                      wrapLongLines={true}
+                      customStyle={{
+                        margin: 0,
+                        borderRadius: 0,
+                        fontSize: '12px',
+                        lineHeight: '1.4',
+                        minWidth: 'fit-content',
+                        maxWidth: '100%'
+                      }}
+                      {...props}
                   >
                     {String(children).replace(/\n$/, '')}
                   </SyntaxHighlighter>
+                  </div>
                 </div>
               );
             }
