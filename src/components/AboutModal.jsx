@@ -102,7 +102,7 @@ const AboutModal = ({ isOpen, onClose }) => {
               </a>
               <a 
                 href="" 
-                target="www.linkedin.com/in/archishman-kar-15131336b" 
+                target="https://www.linkedin.com/in/archishman-kar-15131336b" 
                 rel="noopener noreferrer"
                 className="flex items-center space-x-2 text-sm text-gray-600 hover:text-gray-900 hover:underline transition-colors"
                 aria-label="Developer's LinkedIn Profile"
