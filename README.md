@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./assets/logo.png" alt="VibeAI Logo" width="150" style="border-radius: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" />
+  <img src="./logo.png" alt="VibeAI Logo" width="150" style="border-radius: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" />
 </p>
 
 <h1 align="center">VibeAI 🤖</h1>
