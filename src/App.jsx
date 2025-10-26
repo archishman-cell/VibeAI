@@ -330,7 +330,7 @@ function App() {
                     <img src="./assets/logo.png" alt="Logo" className="w-8 h-8 rounded-full flex-shrink-0" />
                     <div className="flex-1">
                       <div className="bg-white border border-gray-200 rounded-lg p-4">
-                        <div className="prose prose-sm max-w-none">
+                        <div className="prose prose-sm max-w-none break-words">
                           <MarkdownRenderer 
                             content={chatItem.answer}
                             className="text-gray-800"
@@ -338,8 +338,9 @@ function App() {
                         </div>
                         {chatItem.improvedPrompt && (
                           <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                            <div className="flex items-center space-x-2 mb-2">
+                            <div className="flex items-center justify-between space-x-2 mb-2">
                               <h3 className="text-sm font-semibold text-blue-800">💡 Improved Prompt Suggestion</h3>
+                              <CopyButton text={chatItem.improvedPrompt} variant="blue" />
                             </div>
                             <div className="text-blue-700 text-sm">
                               <MarkdownRenderer 
@@ -423,7 +424,7 @@ function App() {
                     <img src="./assets/logo.png" alt="Logo" className="w-8 h-8 rounded-full flex-shrink-0" />
                     <div className="flex-1">
                       <div className="bg-white border border-gray-200 rounded-lg p-4">
-                        <div className="prose prose-sm max-w-none">
+                        <div className="prose prose-sm max-w-none break-words">
                           <div className="text-gray-800">
                             <MarkdownRenderer 
                               content={displayedAnswer}
@@ -436,8 +437,9 @@ function App() {
                         </div>
                         {improvedPrompt && displayedAnswer.length === answer.length && (
                           <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                            <div className="flex items-center space-x-2 mb-2">
+                            <div className="flex items-center justify-between space-x-2 mb-2">
                               <h3 className="text-sm font-semibold text-blue-800">💡 Improved Prompt Suggestion</h3>
+                              <CopyButton text={improvedPrompt} variant="blue" />
                             </div>
                             <div className="text-blue-700 text-sm">
                               <div>

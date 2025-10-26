@@ -4,7 +4,7 @@ import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 
-const MarkdownRenderer = ({ content, className = "" }) => {
+const MarkdownRenderer = ({ content, className = "overflow-x-auto max-w-full break-words whitespace-pre-wrap" }) => {
   return (
     <div className={`prose prose-sm max-w-none ${className}`}>
       <ReactMarkdown
@@ -84,26 +84,31 @@ const MarkdownRenderer = ({ content, className = "" }) => {
                       </svg>
                     </button>
                   </div>
-                  <div className="overflow-x-auto">
-                    <SyntaxHighlighter
-                      style={oneDark}
-                      language={language}
-                      PreTag="div"
-                      wrapLines={true}
-                      wrapLongLines={true}
-                      customStyle={{
-                        margin: 0,
-                        borderRadius: 0,
-                        fontSize: '12px',
-                        lineHeight: '1.4',
-                        minWidth: 'fit-content',
-                        maxWidth: '100%'
-                      }}
-                      {...props}
-                  >
-                    {String(children).replace(/\n$/, '')}
-                  </SyntaxHighlighter>
-                  </div>
+                  <div className="overflow-x-auto max-w-full break-words whitespace-pre-wrap">
+
+  <SyntaxHighlighter
+    style={oneDark}
+    language={language}
+    PreTag="div"
+    wrapLines={true}
+    wrapLongLines={true}
+    customStyle={{
+      margin: 0,
+      borderRadius: 0,
+      fontSize: '12px',
+      lineHeight: '1.5',
+      whiteSpace: 'pre-wrap',
+      wordBreak: 'break-word',
+      overflowWrap: 'break-word',
+      width: '100%',
+      boxSizing: 'border-box',
+    }}
+    {...props}
+  >
+    {String(children).replace(/\n$/, '')}
+  </SyntaxHighlighter>
+</div>
+
                 </div>
               );
             }
